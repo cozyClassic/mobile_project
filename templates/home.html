@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+
+    <!-- Webpage Title -->
+    <title>Hello, world!</title>
+
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <!-- 구글폰트 -->
+    <link href="https://fonts.googleapis.com/css?family=Stylish&display=swap" rel="stylesheet">
+
+    <script>
+        var selected_index = 0;
+
+        var plan_price = [
+            { 'plan_name': '5GX_Platinum', 'price': 125000 },
+            { 'plan_name': '5GX_Prime', 'price': 89000},
+            { 'plan_name': '5GX_Slim', 'price': 55000},
+            { 'plan_name': '5GX_Standard', 'price': 75000},
+            { 'plan_name': 'T_Plan_2.5G', 'price': 43000},
+            { 'plan_name': 'T_Plan_4.0G', 'price': 50000},
+            { 'plan_name': 'T_Plan_Essence', 'price': 69000},
+            { 'plan_name': 'T_Plan_Max', 'price': 100000},
+            { 'plan_name': 'T_Plan_Save', 'price': 33000},
+            { 'plan_name': 'T_Plan_Special', 'price': 79000}
+    ]
+
+        
+      
+        function getData() {
+            $.ajax({
+                type: "POST",
+                url: "/getData",
+                data: {},
+                success: function (response) {
+                    entire_list = response.data2;
+                    console.log(entire_list);
+                    console.log(Object.keys(entire_list[0])[0]);
+                    var index_temp_text;
+                    var index_value_plan;
+                    var index_value_device;
+                    var index_value_device_temp = make_pet_name(index_value_device);
+                    var price_plan_origin;
+                    var index_value_plan_temp = make_plan_name(index_value_plan);
+                    choose_sale_method();
+
+                },
+                error: function (response) {
+                    console.log('실패');
+                }
+            })
+        }
+
+        //원하는 KEY 값을 넣어서, entire_list에서 원하는 값을 dict로 뽑아 올리기
+        //select의 Class 이름은 pet_name_list(pet_name),  안에 <a>추가하기
+        //key value = 1. pet_name  2. model_name
+
+        //이벤트 위임으로 해보기
+        //Value를 넣고, Onclick으로 Value 값을 가져오도록 해보기..
+
+        function make_pet_name() {
+            for (i = 0; i < entire_list.length; i++) {
+
+                let temp_select = `<a class="dropdown-item pet_name_select" href="#" value = "val_${i}_pet_name">' ${entire_list[i]['pet_name']}'</a>`                //각 옵션에 Value를 부여하기
+                $('#select_option_pet_name').append(temp_select);
+            }
+            $('#select_option_pet_name a').on('click', function () {
+                $('#set_select_pet_name').text($(this));        //Value값을 텍스트 형태로 불러오기
+
+                //Value에서 Index값(숫자)만 추출하기
+                index_temp_text = $(this).attr('value');
+                var index_temp_number = index_temp_text.replace(/[^0-9]/g, '');
+
+                console.log(index_temp_number);
+                index_value_device = index_temp_number * 1;
+                make_price_device_origin();
+                return (index_value_device,index_temp_text);
+                
+            })
+        }
+
+        //index 값을 통해서 Dictionary에서 기기 출고가격을 불러오기
+        function make_price_device_origin() {
+            var price_device_temp = entire_list[index_value_device].device_price_origin;
+            console.log(price_device_temp);
+
+            //가격을 변경하기
+            $('#device_price_origin').html('');
+            $('#device_price_origin').append(price_device_temp);
+
+        }
+
+
+        //요금제 원가 - make_dict에서 불러온 값을, 해당 select에 추가하기.
+        function make_plan_name() {
+            for (let i = 0; i < 9; i++) {
+                let temp_select = `<a class="class_plan_name" href="#" value = "val_${i}_plan_name"> ${Object.keys(entire_list[0])[i]} </a>`
+                $('#select_option_plan_name').append(temp_select);
+            }
+            $('#select_option_plan_name a').on('click', function () {
+                $('#set_select_plan_name').text($(this));        //Value값을 텍스트 형태로 불러오기
+
+                //Value에서 Index값(숫자)만 추출하기
+                var index_temp_text = $(this).attr('value');
+                var index_temp_number = index_temp_text.replace(/[^0-9]/g, '');
+
+                index_value_plan = index_temp_number * 1;
+                value_make_plan_price_origin = make_price_plan_origin(index_value_plan);
+                make_price_plan_origin();
+                return(index_value_plan);
+            })
+        }
+
+        function make_price_plan_origin() {
+            var price_plan_origin = plan_price[index_value_plan].price;
+            
+
+            //가격을 변경하기
+            $('#plan_price_origin').html('');
+            $('#plan_price_origin').append(price_plan_origin);
+            
+            
+        }
+
+
+        //선택약정/공시지원금 고르기
+        function choose_sale_method(){
+            $('#select_option_sale_method a').on('click', function(){
+                $('#set_select_sale_method').text($(this));
+                
+                var index_temp_sale_method = $(this).attr('value');
+                console.log(index_temp_sale_method);
+                if (index_temp_sale_method == 'plan_sale'){
+                    contact_sale_plan();
+                }
+                else if (index_temp_sale_method == 'device_sale'){
+                    contact_sale_device();
+
+                };
+            })
+        }
+
+        //선택약정 할인하기 -> 선택약정 선택 시 월요금 원가의 25%를 가격에 나타내기
+
+        function contact_sale_plan(){
+            var sale_plan_price_temp = $("#plan_price_origin").text()*(1/4);
+            
+            $('#device_price_sale').html('');
+            $('#device_price_sale').append(0);
+            $('#plan_price_sale').html('');
+            $('#plan_price_sale').append(sale_plan_price_temp);
+
+        }
+
+        function contact_sale_device(){
+            
+            var plan_name_temp = plan_price[index_value_plan].plan_name;
+            var sale_device_temp = entire_list[index_value_device][plan_name_temp];
+            console.log(sale_device_temp);
+
+
+            $('#device_price_sale').html('');
+            $('#plan_price_sale').html('');
+            $('#plan_price_sale').append(0);
+            $('#device_price_sale').append(sale_device_temp);
+            
+
+        }
+
+        function make_payment_plan(){
+            $('.payment_plan_a')
+            $('#select_option_payment_plan a').on('click', function () {
+                $('#set_select_payment_plan').text($(this));        //Value값을 텍스트 형태로 불러오기
+
+                //Value에서 Index값(숫자)만 추출하기
+                var index_temp_text = $(this).attr('value');
+                var index_temp_number = index_temp_text.replace(/[^0-9]/g, '');
+
+                index_value_plan = index_temp_number * 1;
+                value_make_plan_price_origin = make_price_plan_origin(index_value_plan);
+                make_price_plan_origin();
+                return(index_value_plan);
+            })
+        }
+
+
+
+
+        //기존의 출고가를 지우기
+        getData();
+        choose_sale_method();
+
+
+        </script>
+    
+    <!-- style -->
+    <style type="text/css">
+        * {
+            font-family: 'Stylish', sans-serif;
+        }
+    
+        .wrap {
+            width: 900px;
+            margin: auto;
+        }
+    
+        .comment {
+            color: blue;
+            font-weight: bold;
+        }
+    
+        .form-post {
+            max-width: 500px;
+            padding: 2rem;
+            margin: 2rem auto;
+            border-color: #e9ecef;
+            border-radius: 0.3rem;
+            border: solid;
+            display: block;
+        }
+    
+        #posting-box {
+            display: none;
+        }
+    </style>
+    
+    </head>
+    
+    <body>
+    
+        <h1> 핸드폰 요금을 계산 해보세요.</h1>
+    
+    
+        <div class="row w-50" id="select_box" style="margin: auto;">
+            <div class="card-body">
+                <h5 class="card-title">기기 종류</h5>
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="set_select_pet_name"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        최고의 핸드폰
+                    </button>
+                    <div id="select_option_pet_name" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <!--<a class="dropdown-item" href="#">Action</a>
+                        <a class="dropdown-item" href="#">1번옵션</a>
+                        <a class="dropdown-item" href="#">2번옵션</a>-->
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">요금제 종류 </h5>
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="set_select_plan_name"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        저렴한 요금제
+                    </button>
+                    <div id="select_option_plan_name" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <!--<a class="dropdown-item" href="#">Action</a>
+                        <a class="dropdown-item" href="#">1번옵션</a>
+                        <a class="dropdown-item" href="#">2번옵션</a>-->
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title"> 선택약정/공시지원금 </h5>
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="set_select_sale_method"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        엄청난 할인
+                    </button>
+                    <div id="select_option_sale_method" class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" href="#" value="plan_sale">선택약정</a>
+                        <a class="dropdown-item" href="#" value="device_sale">공시지원금</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title"> 할부 기간 </h5>
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="set_select_payment_plan"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        친절한 서비스
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" id="select_option_payment_plan">
+                        <a class="dropdown-item payment_plan_a" href="#" value = 24>24개월</a>
+                        <a class="dropdown-item payment_plan_a" href="#" value = 30>30개월</a>
+                        <a class="dropdown-item payment_plan_a" href="#" value = 36>36개월</a>
+                        <a class="dropdown-item payment_plan_a" href="#" value = 48>48개월</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">고객 선납금</h5>
+                <div class="input-group input-group-lg">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="inputGroup-sizing-lg">Large</span>
+                    </div>
+                    <input type="text" class="form-control" aria-label="Sizing example input"
+                        aria-describedby="inputGroup-sizing-lg">
+                </div>
+            </div>
+        </div>
+
+    <div class="row" style="margin: auto;">
+        <div style ="margin:auto;"></div>
+        <div class="card" style=" background-color:bisque;">
+            <div class="card-body">
+                <h5>기기 금액</h5>
+                <div class="card border-primary mb-3" style="max-width: 18rem;">
+                    <div class="card-header" >출고 가격</div>
+                    <div class="card-body text-primary">
+                        <h5 class="card-title" id="device_price_origin">0</h5>
+                    </div>
+                </div>
+                <div class="card border-primary mb-3" style="max-width: 18rem;">
+                    <div class="card-header">공시 지원금 할인 (-)</div>
+                    <div class="card-body text-primary">
+                        <h5 class="card-title" id = "device_price_sale">0</h5>
+                    </div>
+                </div>
+                <div class="card border-primary mb-3" style="max-width: 18rem;">
+                    <div class="card-header">갤럭시 클럽 할인 (-)</div>
+                    <div class="card-body text-primary">
+                        <h5 class="card-title">0</h5>
+                    </div>
+                </div>
+                <div class="card border-primary mb-3" style="max-width: 18rem;">
+                    <div class="card-header">단말기 할부 이자 (+) </div>
+                    <div class="card-body text-primary">
+                        <h5 class="card-title">0</h5>
+                    </div>
+                </div>
+                <div class="card border-secondary mb-3" style="max-width: 18rem;">
+                    <div class="card-header">월 할부금</div>
+                    <div class="card-body text-secondary">
+                        <h5 class="card-title">0</h5>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card" style=" background-color:rgb(194, 207, 245) ">
+            <div class="card-body">
+                <h5> 요금제 금액(월 기준)</h5>
+                <div class="card border-secondary mb-3" style="max-width: 18rem;">
+                    <div class="card-header">월 요금 원가</div>
+                    <div class="card-body text-secondary">
+                        <h5 class="card-title" id="plan_price_origin">0</h5>
+                    </div>
+                </div>
+                <div class="card border-secondary mb-3" style="max-width: 18rem;">
+                    <div class="card-header">선택 약정 할인(-)</div>
+                    <div class="card-body text-secondary">
+                        <h5 class="card-title" id="plan_price_sale">0</h5>
+                    </div>
+                </div>
+                <div class="card border-secondary mb-3" style="max-width: 18rem;">
+                    <div class="card-header">월 통신요금</div>
+                    <div class="card-body text-secondary">
+                        <h5 class="card-title">0</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="background-color: rgb(250, 178, 178);">
+            <div class="card-body">
+                <h5> 월 청구액</h5>
+                <div class="card border-info mb-3" style="max-width: 18rem;">
+                    <div class="card-header">월 청구 금액</div>
+                    <div class="card-body text-info">
+                        <h5 class="card-title">0</h5>
+                    </div>
+                </div>
+                <div class="card border-info mb-3" style="max-width: 18rem;">
+                    <div class="card-header">총 할인가격</div>
+                    <div class="card-body text-info">
+                        <h5 class="card-title">0</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style ="margin:auto;"></div>
+
+    </div>
+
+
+</body>
+
+</html>

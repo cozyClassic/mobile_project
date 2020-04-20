@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+	<!-- Webpage Title -->
+	<title>index</title>
+
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+		integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+	<!-- JS -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+		integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+		crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+		integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+		crossorigin="anonymous"></script>
+
+	<!-- 구글폰트 -->
+	<link href="https://fonts.googleapis.com/css?family=Stylish&display=swap" rel="stylesheet">
+
+	<script>
+		var data_list = "{{data}}"
+				
+		//getData() 리스트 데이터 불러오기
+		function getData() {
+			var result;
+			$.ajax({
+				type: "POST",
+				url: "/getData",
+				data: {},
+				success: function (response) {
+					entire_list = response.data2;
+					var test_result = entire_list[0]['pet_name']
+					console.log(entire_list.length)
+					make_dict()
+					make_select()
+				},
+				error: function(response){
+					console.log('실패');
+				}
+			})
+		}
+
+
+		//원하는 KEY 값을 넣어서, entire_list에서 원하는 값을 dict로 뽑아 올리기
+		  function make_dict(){
+
+
+		}
+
+		
+		//make_dict에서 불러온 값을, 해당 select에 추가하기.
+		function make_select(key_value){
+			for (let i=0; i<entire_list.length; i++){
+
+			}
+		}
+
+		//make_select 함수를 key_value (펫네임,모델명,가격,)
+
+		getData()
+
+	</script>
+</head>
+<body>
+	<h1> Welcome to indexpage</h1>
+
+	</body>
+</html>
